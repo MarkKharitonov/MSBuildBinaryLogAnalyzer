@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net472</TargetFramework>
+        <OutputType>Exe</OutputType>
+      <DebugType>full</DebugType>
+      <DebugSymbols>true</DebugSymbols>
+    </PropertyGroup>
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Build.Framework" Version="15.8.166" />
+      <PackageReference Include="MSBuild.StructuredLogger" Version="2.0.110" />
+    </ItemGroup>
+</Project>

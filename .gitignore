@@ -1,0 +1,6 @@
+﻿.vs*
+.idea
+[Bb]in
+[Oo]bj
+packages
+Dayforce.PS.Core.Bootstrap.Impl.ps1
