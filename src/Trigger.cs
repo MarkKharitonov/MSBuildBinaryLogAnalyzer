@@ -42,7 +42,7 @@ namespace MSBuildBinaryLogAnalyzer
 
         public override string ToString()
         {
-            if (Diff?.Count == 0)
+            if (Diff == null || Diff.Count == 0)
             {
                 return ProjectName;
             }
