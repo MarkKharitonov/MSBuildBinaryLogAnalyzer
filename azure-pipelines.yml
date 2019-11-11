@@ -1,0 +1,12 @@
+trigger:
+- master
+
+name: 1.0.$(Date:yy)$(DayOfYear)$(Rev:.r)
+
+pool:
+  demands: DotNetFramework
+
+steps:
+- powershell: ./build/build.ps1
+  displayName: Build
+  name: Build
