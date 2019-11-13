@@ -4,7 +4,7 @@ using Microsoft.Build.Framework;
 
 namespace MSBuildBinaryLogAnalyzer
 {
-    internal class GenerateCompileDependencyCacheTarget
+    public class GenerateCompileDependencyCacheTarget
     {
         public readonly TargetStartedEventArgs TargetStarted;
         public readonly List<BuildEventArgs> Children = new List<BuildEventArgs>();

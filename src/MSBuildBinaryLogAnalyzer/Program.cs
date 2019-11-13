@@ -1,174 +1,68 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Logging.StructuredLogger;
+using ManyConsole;
 
 namespace MSBuildBinaryLogAnalyzer
 {
     internal class Program
     {
-        private const string MARKER = @".csproj.CoreCompileInputs.cache"" is newer than output file ""obj\Debug\";
-        private const string PATTERN = @"Input file ""obj\\Debug\\(.+)\.csproj\.CoreCompileInputs\.cache"" is newer than output file ""obj\\Debug\\.+""\.";
-        private const string DESIGN_TIME_BUILD_MSG = @"Output file ""__NonExistentSubDir__\__NonExistentFile__"" does not exist.";
-        private static readonly Regex s_regex = new Regex(PATTERN);
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern int GetConsoleProcessList(int[] pids, int arraySize);
 
-        public static int Main(string[] args)
+        private static bool OwnsConsole()
         {
-            if (args.Length == 0 || args.Length > 2)
+            var pids = new int[1];   // Intentionally too short
+            return GetConsoleProcessList(pids, pids.Length) == 1;
+        }
+
+        static int Main(string[] args)
+        {
+            try
             {
-                Console.Error.WriteLine($"Usage: {Path.GetFileName(Assembly.GetEntryAssembly().Location)} binary_log_file_path [another_binary_log_file_path]");
+                var commands = ConsoleCommandDispatcher.FindCommandsInSameAssemblyAs(typeof(Program));
+                foreach (var c in commands)
+                {
+                    c.SkipsCommandSummaryBeforeRunning();
+                }
+                args = SupportCompatibilityMode(args, commands);
+                return ConsoleCommandDispatcher.DispatchCommand(commands, args, Console.Out);
+            }
+            catch (Exception exc)
+            {
+                Console.Error.WriteLine(exc);
                 return 1;
             }
-
-            var binaryLogFilePath = args[0];
-            if (!File.Exists(binaryLogFilePath))
+            finally
             {
-                Console.Error.WriteLine($"File not found - {binaryLogFilePath}");
-                return 2;
-            }
-
-            string binaryLogFilePath2 = null;
-            if (args.Length == 2)
-            {
-                binaryLogFilePath2 = args[1];
-                if (!File.Exists(binaryLogFilePath2))
+                if (!Console.IsOutputRedirected && OwnsConsole())
                 {
-                    Console.Error.WriteLine($"File not found - {binaryLogFilePath2}");
-                    return 2;
-                }
-            }
-
-            var triggers = new List<Trigger>();
-            var projects = new List<string>();
-            var reader = new BinLogReader();
-            var generateCompileDependencyCacheTargets = new NodeList<GenerateCompileDependencyCacheTarget>();
-            string designTimeBuildProjectName = null;
-            bool? isDesignTimeBuild = null;
-            foreach (var ev in reader.ReadRecords(binaryLogFilePath))
-            {
-                if (ev.Args?.BuildEventContext == null)
-                {
-                    continue;
-                }
-
-                if (isDesignTimeBuild == null && ev.Args is ProjectStartedEventArgs projectStarted)
-                {
-                    isDesignTimeBuild = projectStarted.GlobalProperties.TryGetValue("DesignTimeBuild", out var designTimeBuild) &&
-                        bool.TrueString.Equals(designTimeBuild, StringComparison.OrdinalIgnoreCase);
-                    if (isDesignTimeBuild.Value)
-                    {
-                        designTimeBuildProjectName = Path.GetFileNameWithoutExtension(projectStarted.ProjectFile);
-                    }
-                }
-
-                if (ev.Args is TaskStartedEventArgs taskStarted && taskStarted.TaskName == "Csc")
-                {
-                    projects.Add(taskStarted.ProjectFile);
-                }
-
-                int nodeId = Math.Max(0, ev.Args.BuildEventContext.NodeId);
-                if (binaryLogFilePath2 != null)
-                {
-                    if (ev.Args is TargetStartedEventArgs targetStarted && targetStarted.TargetName == "_GenerateCompileDependencyCache")
-                    {
-                        generateCompileDependencyCacheTargets[nodeId] = new GenerateCompileDependencyCacheTarget(targetStarted);
-                    }
-                    else if (generateCompileDependencyCacheTargets[nodeId] != null && !generateCompileDependencyCacheTargets[nodeId].IsClosed)
-                    {
-                        generateCompileDependencyCacheTargets[nodeId].Children.Add(ev.Args);
-                    }
-                }
-
-                Match m = null;
-                if (ev.Args is BuildMessageEventArgs msgEvent
-                    && msgEvent.Message != null
-                    && (designTimeBuildProjectName == null
-                        ? msgEvent.Message.Contains(MARKER)
-                          && (m = s_regex.Match(msgEvent.Message)).Success
-                        : msgEvent.Message == DESIGN_TIME_BUILD_MSG))
-                {
-                    List<string> items = null;
-                    if (binaryLogFilePath2 != null)
-                    {
-                        items = generateCompileDependencyCacheTargets[nodeId].GetItemsToHash();
-                    }
-
-                    triggers.Add(new Trigger(designTimeBuildProjectName ?? m.Groups[1].Value, items));
-                }
-            }
-
-            if (triggers.Count > 0 && binaryLogFilePath2 != null)
-            {
-                ProcessSecondBinaryLog(binaryLogFilePath2, triggers);
-            }
-
-            if (designTimeBuildProjectName != null)
-            {
-                Console.WriteLine($"Design time build for {designTimeBuildProjectName}");
-            }
-            if (Report("Triggers", triggers) + Report("Recompiled projects", projects) > 0)
-            {
-                return 3;
-            }
-
-            return 0;
-        }
-
-        private static void ProcessSecondBinaryLog(string binaryLogFilePath, List<Trigger> triggers)
-        {
-            var reader = new BinLogReader();
-            var generateCompileDependencyCacheTargets = new NodeList<GenerateCompileDependencyCacheTarget>();
-            foreach (var ev in reader.ReadRecords(binaryLogFilePath))
-            {
-                if (ev.Args?.BuildEventContext == null)
-                {
-                    continue;
-                }
-
-                int nodeId = Math.Max(0, ev.Args.BuildEventContext.NodeId);
-                if (ev.Args is TargetStartedEventArgs targetStarted && targetStarted.TargetName == "_GenerateCompileDependencyCache")
-                {
-                    generateCompileDependencyCacheTargets[nodeId] = new GenerateCompileDependencyCacheTarget(targetStarted);
-                }
-                else if (generateCompileDependencyCacheTargets[nodeId] != null && !generateCompileDependencyCacheTargets[nodeId].IsClosed)
-                {
-                    Trigger trigger;
-                    if (ev.Args is BuildMessageEventArgs msgEvent && (trigger = GetMatchingTrigger(triggers, msgEvent.Message)) != null)
-                    {
-                        trigger.DiffItemsToHash(generateCompileDependencyCacheTargets[nodeId].GetItemsToHash());
-                        generateCompileDependencyCacheTargets[nodeId] = null;
-                    }
-                    else
-                    {
-                        generateCompileDependencyCacheTargets[nodeId].Children.Add(ev.Args);
-                    }
+                    Console.WriteLine("Press any key to exit ...");
+                    Console.ReadKey();
                 }
             }
         }
 
-        private static Trigger GetMatchingTrigger(IEnumerable<Trigger> triggers, string msg) =>
-            triggers.FirstOrDefault(t =>
-                msg.StartsWith($"Added Item(s): FileWrites=obj\\Debug\\") &&
-                msg.EndsWith($"\\{t.ProjectName}.csproj.CoreCompileInputs.cache"));
-
-        private static int Report<T>(string category, IReadOnlyCollection<T> values) where T : class
+        private static string[] SupportCompatibilityMode(string[] args, IEnumerable<ConsoleCommand> commands)
         {
-            if (values.Count <= 0)
+            if ((args.Length == 1 || args.Length == 2) && commands.All(c => !string.Equals(c.Command, args[0], StringComparison.OrdinalIgnoreCase)))
             {
-                return 0;
+                // Compatibility mode.
+                var a = new string[1 + 2 * args.Length];
+                a[0] = "default";
+                a[1] = "-i";
+                a[2] = args[0];
+                if (args.Length == 2)
+                {
+                    a[3] = "--i2";
+                    a[4] = args[1];
+                }
+                args = a;
             }
 
-            Console.WriteLine($"{category}:");
-            foreach (var v in values)
-            {
-                Console.WriteLine($"  {v}");
-            }
-
-            return 1;
+            return args;
         }
     }
 }

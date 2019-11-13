@@ -5,6 +5,7 @@
       <LangVersion>7.3</LangVersion>
     </PropertyGroup>
     <ItemGroup>
+      <PackageReference Include="ManyConsole" Version="2.0.1" />
       <PackageReference Include="Microsoft.Build.Framework" Version="15.8.166" />
       <PackageReference Include="MSBuild.StructuredLogger" Version="2.0.110" />
     </ItemGroup>
