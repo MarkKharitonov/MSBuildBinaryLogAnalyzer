@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,25 +19,32 @@ namespace MSBuildBinaryLogAnalyzer
 
         public void DiffItemsToHash(List<string> itemsToHash)
         {
-            if (ItemsToHash.Count != itemsToHash.Count)
-            {
-                return;
-            }
-
             Diff = new List<(string FirstBuild, string SecondBuild)>();
-            for (var i = 0; i < ItemsToHash.Count; ++i)
+            ItemsToHash.RemoveAll(itemsToHash.Remove);
+
+            var count = Math.Min(ItemsToHash.Count, itemsToHash.Count);
+            int i = 0;
+            for (; i < count; ++i)
             {
                 if (ItemsToHash[i] != itemsToHash[i])
                 {
-                    int prevPos,  pos = -1;
+                    int prevPos, pos = -1;
                     do
                     {
                         prevPos = pos;
                         pos = ItemsToHash[i].IndexOf('\\', pos + 1);
-                    } while (string.Compare(ItemsToHash[i], 0, itemsToHash[i], 0, pos) == 0);
+                    } while (pos > 0 && string.Compare(ItemsToHash[i], 0, itemsToHash[i], 0, pos) == 0);
 
                     Diff.Add((FirstBuild: itemsToHash[i].Substring(prevPos), SecondBuild: ItemsToHash[i].Substring(prevPos)));
                 }
+            }
+            for (; i < ItemsToHash.Count; ++i)
+            {
+                Diff.Add((FirstBuild: null, SecondBuild: ItemsToHash[i]));
+            }
+            for (; i < itemsToHash.Count; ++i)
+            {
+                Diff.Add((FirstBuild: itemsToHash[i], SecondBuild: null));
             }
         }
 

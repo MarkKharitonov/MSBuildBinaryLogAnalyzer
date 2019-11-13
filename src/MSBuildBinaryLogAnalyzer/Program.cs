@@ -13,6 +13,7 @@ namespace MSBuildBinaryLogAnalyzer
     {
         private const string MARKER = @".csproj.CoreCompileInputs.cache"" is newer than output file ""obj\Debug\";
         private const string PATTERN = @"Input file ""obj\\Debug\\(.+)\.csproj\.CoreCompileInputs\.cache"" is newer than output file ""obj\\Debug\\.+""\.";
+        private const string DESIGN_TIME_BUILD_MSG = @"Output file ""__NonExistentSubDir__\__NonExistentFile__"" does not exist.";
         private static readonly Regex s_regex = new Regex(PATTERN);
 
         public static int Main(string[] args)
@@ -45,11 +46,23 @@ namespace MSBuildBinaryLogAnalyzer
             var projects = new List<string>();
             var reader = new BinLogReader();
             var generateCompileDependencyCacheTargets = new NodeList<GenerateCompileDependencyCacheTarget>();
+            string designTimeBuildProjectName = null;
+            bool? isDesignTimeBuild = null;
             foreach (var ev in reader.ReadRecords(binaryLogFilePath))
             {
                 if (ev.Args?.BuildEventContext == null)
                 {
                     continue;
+                }
+
+                if (isDesignTimeBuild == null && ev.Args is ProjectStartedEventArgs projectStarted)
+                {
+                    isDesignTimeBuild = projectStarted.GlobalProperties.TryGetValue("DesignTimeBuild", out var designTimeBuild) &&
+                        bool.TrueString.Equals(designTimeBuild, StringComparison.OrdinalIgnoreCase);
+                    if (isDesignTimeBuild.Value)
+                    {
+                        designTimeBuildProjectName = Path.GetFileNameWithoutExtension(projectStarted.ProjectFile);
+                    }
                 }
 
                 if (ev.Args is TaskStartedEventArgs taskStarted && taskStarted.TaskName == "Csc")
@@ -70,11 +83,13 @@ namespace MSBuildBinaryLogAnalyzer
                     }
                 }
 
-                Match m;
+                Match m = null;
                 if (ev.Args is BuildMessageEventArgs msgEvent
                     && msgEvent.Message != null
-                    && msgEvent.Message.Contains(MARKER)
-                    && (m = s_regex.Match(msgEvent.Message)).Success)
+                    && (designTimeBuildProjectName == null
+                        ? msgEvent.Message.Contains(MARKER)
+                          && (m = s_regex.Match(msgEvent.Message)).Success
+                        : msgEvent.Message == DESIGN_TIME_BUILD_MSG))
                 {
                     List<string> items = null;
                     if (binaryLogFilePath2 != null)
@@ -82,7 +97,7 @@ namespace MSBuildBinaryLogAnalyzer
                         items = generateCompileDependencyCacheTargets[nodeId].GetItemsToHash();
                     }
 
-                    triggers.Add(new Trigger(m.Groups[1].Value, items));
+                    triggers.Add(new Trigger(designTimeBuildProjectName ?? m.Groups[1].Value, items));
                 }
             }
 
@@ -91,6 +106,10 @@ namespace MSBuildBinaryLogAnalyzer
                 ProcessSecondBinaryLog(binaryLogFilePath2, triggers);
             }
 
+            if (designTimeBuildProjectName != null)
+            {
+                Console.WriteLine($"Design time build for {designTimeBuildProjectName}");
+            }
             if (Report("Triggers", triggers) + Report("Recompiled projects", projects) > 0)
             {
                 return 3;
@@ -131,8 +150,10 @@ namespace MSBuildBinaryLogAnalyzer
             }
         }
 
-        private static Trigger GetMatchingTrigger(IEnumerable<Trigger> triggers, string msg) => 
-            triggers.FirstOrDefault(t => msg == $"Added Item(s): FileWrites=obj\\Debug\\{t.ProjectName}.csproj.CoreCompileInputs.cache");
+        private static Trigger GetMatchingTrigger(IEnumerable<Trigger> triggers, string msg) =>
+            triggers.FirstOrDefault(t =>
+                msg.StartsWith($"Added Item(s): FileWrites=obj\\Debug\\") &&
+                msg.EndsWith($"\\{t.ProjectName}.csproj.CoreCompileInputs.cache"));
 
         private static int Report<T>(string category, IReadOnlyCollection<T> values) where T : class
         {
