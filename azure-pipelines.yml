@@ -3,10 +3,57 @@ trigger:
 
 name: 1.0.$(Date:yy)$(DayOfYear)$(Rev:.r)
 
-pool:
-  demands: DotNetFramework
+jobs:
+  - job: Build
+    pool:
+      demands: DotNetFramework
+    workspace:
+      clean: all
+    variables:
+      PublishNuGet: $[and(ne(variables['Build.Reason'], 'PullRequest'), ne(variables['NoPublishNuGet'], true))]
+      PublishSymbols: $[and(ne(variables['Build.Reason'], 'PullRequest'), ne(variables['NoPublishSymbols'], true))]
+      PromoteNuGetPackages: $[and(
+        eq(variables['Build.SourceBranch'], 'refs/heads/master'),
+        ne(variables['NoPromoteNuGetPackages'], true)
+        )]
+    steps:
+    - script: set 
+      displayName: Show Environment
+      name: ShowEnvironment
+      condition: eq(variables['System.Debug'], true)
 
-steps:
-- powershell: ./build/build.ps1
-  displayName: Build
-  name: Build
+    - powershell: . .\build\Dayforce.PS.Core.Bootstrap.ps1 ; Use-Defaults -QaOnly:$($env:QaOnly -eq 'true')
+      displayName: Use Dayforce.PS.Core
+      name: UseDayforcePSCore
+
+    - powershell: Invoke-DotNetBuild
+      displayName: Build
+      name: Build
+
+    - powershell: New-ToolNuSpecFile src\MSBuildBinaryLogAnalyzer\bin\Release\net472
+      displayName: Create NuSpec File
+      name: CreateNuSpecFile
+
+    - powershell: Invoke-DotNetBuild pack -MoreArgs "-p:NuSpecFile=$env:ToolNuSpecFile"
+      displayName: Pack
+      name: Pack
+
+    - powershell: Publish-BuildNuGetArtifacts
+      displayName: Publish NuGet Artifacts
+      name: Publish
+      condition: and(succeeded(), eq(variables['PublishNuGet'], true))
+
+    - task: PublishSymbols@2
+      displayName: Publish Symbols
+      timeoutInMinutes: 5
+      inputs:
+        SymbolServerType: FileShare
+        SymbolsArtifactName: 'Symbols'
+        SymbolsPath: '\\devstatic\symbols\dayforce'
+        TreatNotIndexedAsWarning: true
+      condition: and(succeeded(), eq(variables['PublishSymbols'], true))
+      
+    - powershell: Set-PackagesQuality (Get-Item *.sln).BaseName
+      displayName: Promote NuGet Package
+      name: PromoteNuGetPackage
+      condition: and(succeeded(), eq(variables['PromoteNuGetPackages'], true))

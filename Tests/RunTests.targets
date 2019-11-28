@@ -1,0 +1,8 @@
+<Project>
+    <PropertyGroup Condition="'$(Build_BuildUri)' != ''">
+        <EnableCoverage Condition="'$(EnableCoverage)' == ''">OpenCover</EnableCoverage>
+        <RunTests Condition="'$(RunTests)' == ''">True</RunTests>
+    </PropertyGroup>
+	
+    <Import Project="$(MSBuildThisFileDirectory)../Test.targets" />
+</Project>

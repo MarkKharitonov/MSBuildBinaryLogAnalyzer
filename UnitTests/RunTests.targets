@@ -1,0 +1,17 @@
+<Project>
+    <PropertyGroup>
+        <EnableCoverage Condition="'$(EnableCoverage)' == '' And '$(Build_BuildUri)' != ''">OpenCover</EnableCoverage>
+        <TargetsTriggeredByCompilation>
+            $(TargetsTriggeredByCompilation);
+            EnableUnitTests;
+        </TargetsTriggeredByCompilation>
+    </PropertyGroup>
+
+    <Target Name="EnableUnitTests">
+        <PropertyGroup>
+            <RunTests Condition="'$(RunTests)' != False">True</RunTests>
+        </PropertyGroup>
+    </Target>
+	
+    <Import Project="$(MSBuildThisFileDirectory)../Test.targets" />
+</Project>

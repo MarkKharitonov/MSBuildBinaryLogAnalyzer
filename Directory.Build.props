@@ -1,31 +1,42 @@
 ﻿<Project>
   <PropertyGroup>
-    <NoWarn>NU5105;NU1608</NoWarn>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-
-    <Version>$([System.Text.RegularExpressions.Regex]::Match($(BuildNumber), `\d+\.\d+(?:.\d+)?(?:.\d+)?`))</Version>
-    <Company>Ceridian HCM Holding, Inc.</Company>
-    <Copyright>Copyright © 2019 by $(Company) All rights reserved.</Copyright>
     <Product>MSBuildBinaryLogAnalyzer</Product>
     <AssemblyTitle>MSBuild Binary Log Analyzer</AssemblyTitle>
     <Description>Scans the given msbuild binary log file looking for projects that were compiled only because their respective XYZ.csproj.CoreCompileInputs.cache file has changed.</Description>
+    <Team>Release Engineering</Team>
+
+    <NoWarn>NU5105;NU1608</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <Version Condition="'$(BUILD_BUILDNUMBER)' != ''">$([System.Text.RegularExpressions.Regex]::Match($(BUILD_BUILDNUMBER), `\d+\.\d+(?:.\d+)?(?:.\d+)?`))</Version>
+    <Company>Ceridian HCM Holding, Inc.</Company>
+    <Copyright>Copyright © 2018 by $(Company) All rights reserved.</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Title>$(AssemblyTitle)</Title>
     <!-- Setting nuspec Owners property from msbuild is currently not supported. At the moment it is set to be equal Authors. -->
     <Authors>$(Company)</Authors>
+    <RepositoryBranch Condition="'$(BUILD_SOURCEBRANCHNAME)' != ''">$(BUILD_SOURCEBRANCHNAME)</RepositoryBranch>
+    <SourceRevisionId Condition="'$(BUILD_SOURCEVERSION)' != ''">$(BUILD_SOURCEVERSION.Substring(0,12))</SourceRevisionId>
+    <RepositoryType>git</RepositoryType>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(BUILD_REPOSITORY_URI)' != ''">
+    <PackageProjectUrl>$(BUILD_REPOSITORY_URI)</PackageProjectUrl>
+    <RepositoryUrl>$(BUILD_REPOSITORY_URI)</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
       <_Parameter1>Authors</_Parameter1>
-      <_Parameter2>DevOps</_Parameter2>
+      <_Parameter2>$(Team)</_Parameter2>
     </AssemblyAttribute>
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(BUILD_DEFINITIONNAME)' != ''">
       <_Parameter1>Build Definition</_Parameter1>
       <_Parameter2>$(BUILD_DEFINITIONNAME)</_Parameter2>
     </AssemblyAttribute>
-    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(RepositoryUrl)' != ''">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(BUILD_REPOSITORY_URI)' != ''">
       <_Parameter1>Repository Url</_Parameter1>
-      <_Parameter2>$(RepositoryUrl)</_Parameter2>
+      <_Parameter2>$(BUILD_REPOSITORY_URI)</_Parameter2>
     </AssemblyAttribute>
   </ItemGroup>
 </Project>

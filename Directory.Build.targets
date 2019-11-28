@@ -1,0 +1,14 @@
+﻿<Project>
+    <Target Name="SaveWarningsSetup" BeforeTargets="OverrideRoslynCodeAnalysisProperties">
+        <PropertyGroup>
+            <_SaveTreatWarningsAsErrors>$(TreatWarningsAsErrors)</_SaveTreatWarningsAsErrors>
+            <_SaveWarningsAsErrors>$(WarningsAsErrors)</_SaveWarningsAsErrors>
+        </PropertyGroup>
+    </Target>
+    <Target Name="RestoreWarningsSetup" AfterTargets="OverrideRoslynCodeAnalysisProperties">
+        <PropertyGroup>
+            <TreatWarningsAsErrors>$(_SaveTreatWarningsAsErrors)</TreatWarningsAsErrors>
+            <WarningsAsErrors>$(_SaveWarningsAsErrors)</WarningsAsErrors>
+        </PropertyGroup>
+    </Target>
+</Project>

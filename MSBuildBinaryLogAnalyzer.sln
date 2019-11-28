@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBuildBinaryLogAnalyzer", "src\MSBuildBinaryLogAnalyzer.csproj", "{45C977BB-C265-46C3-A2B4-D5F64FD9D48F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBuildBinaryLogAnalyzer", "src\MSBuildBinaryLogAnalyzer\MSBuildBinaryLogAnalyzer.csproj", "{45C977BB-C265-46C3-A2B4-D5F64FD9D48F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
