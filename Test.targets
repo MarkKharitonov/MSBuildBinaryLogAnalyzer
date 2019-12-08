@@ -1,26 +1,26 @@
 <Project>
-    <Target Name="RunTests" Condition="'$(RunTests)' == True" AfterTargets="PrepareForRun">
-        <PropertyGroup>
-            <CommandLine>powershell -ExecutionPolicy ByPass -NoProfile -Command &quot;&amp;{ Invoke-Tests $(TargetPath) -NUnitVersion 3.10.0</CommandLine>
-        </PropertyGroup>
-	    <PropertyGroup Condition="'$(EnableCoverage)' == DotCover">
-            <DotCoverReportType Condition="'$(DotCoverReportType)' == ''">html</DotCoverReportType>
-            <DotCoverToolParams Condition="'$(DotCoverReportType)' != 'Snapshot'">-ToolParams @{ DotCover = @{ ReportType = '$(DotCoverReportType)' } }</DotCoverToolParams>
-            <CommandLine>$(CommandLine) -CoverTool DotCover -CoverToolVersion 2019.2.0 $(DotCoverToolParams)</CommandLine>
-        </PropertyGroup>
-        <PropertyGroup Condition="'$(EnableCoverage)' == OpenCover">
-            <CommandLine>$(CommandLine) -CoverTool OpenCover -CoverToolVersion 4.7.922</CommandLine>
-        </PropertyGroup>
-        <PropertyGroup>
-            <CommandLine>$(CommandLine) }&quot;</CommandLine>
-        </PropertyGroup>
-        <Message Text="$(CommandLine)" Importance="high" />
-        <Exec Command="$(CommandLine)" CustomErrorRegularExpression="\) Failed :"/>
-        <OnError ExecuteTargets="DeleteTargetPath" Condition="'$(Build_BuildUri)' != ''"/>
-    </Target>
+  <Target Name="RunTests" Condition="'$(RunTests)' == True" AfterTargets="PrepareForRun">
+    <PropertyGroup>
+      <CommandLine>powershell -ExecutionPolicy ByPass -NoProfile -Command &quot;&amp;{ Invoke-Tests $(TargetPath) -NUnitVersion 3.10.0</CommandLine>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(EnableCoverage)' == DotCover">
+      <DotCoverReportType Condition="'$(DotCoverReportType)' == ''">html</DotCoverReportType>
+      <DotCoverToolParams Condition="'$(DotCoverReportType)' != 'Snapshot'">-ToolParams @{ DotCover = @{ ReportType = '$(DotCoverReportType)' } }</DotCoverToolParams>
+      <CommandLine>$(CommandLine) -CoverTool DotCover -CoverToolVersion 2019.2.0 $(DotCoverToolParams)</CommandLine>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(EnableCoverage)' == OpenCover">
+      <CommandLine>$(CommandLine) -CoverTool OpenCover -CoverToolVersion 4.7.922</CommandLine>
+    </PropertyGroup>
+    <PropertyGroup>
+      <CommandLine>$(CommandLine); exit $LastExitCode }&quot;</CommandLine>
+    </PropertyGroup>
+    <Message Text="$(CommandLine)" Importance="high" />
+    <Exec Command="$(CommandLine)" CustomErrorRegularExpression="\)(?:\s+\w+)? Failed :"/>
+    <OnError ExecuteTargets="DeleteTargetPath" Condition="'$(Build_BuildUri)' != ''"/>
+  </Target>
 
-    <Target Name="DeleteTargetPath" Condition="'$(Build_BuildUri)' != ''">
-        <Message Text="Deleting $(TargetPath) and @(IntermediateAssembly)" Importance="high"/>
-        <Delete Files="$(TargetPath);@(IntermediateAssembly)"/>
-    </Target>
+  <Target Name="DeleteTargetPath" Condition="'$(Build_BuildUri)' != ''">
+    <Message Text="Deleting $(TargetPath) and @(IntermediateAssembly)" Importance="high"/>
+    <Delete Files="$(TargetPath);@(IntermediateAssembly)"/>
+  </Target>
 </Project>
