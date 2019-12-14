@@ -6,6 +6,7 @@ using System.Linq;
 using ManyConsole;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging.StructuredLogger;
+using Newtonsoft.Json;
 
 namespace MSBuildBinaryLogAnalyzer
 {
@@ -15,6 +16,7 @@ namespace MSBuildBinaryLogAnalyzer
         private const string DESIGN_TIME_BUILD_MSG = @"Output file ""__NonExistentSubDir__\__NonExistentFile__"" does not exist.";
         private string m_input1;
         private string m_input2;
+        private bool m_json;
 
         public DefaultCmd()
         {
@@ -31,6 +33,7 @@ respective project in both logs and output the difference.
             // Required options/flags, append '=' to obtain the required value.
             HasRequiredOption("i=", "The first input binary log file or directory of logs.", v => m_input1 = v);
             HasOption("i2=", "The second input binary log file or directory of logs.", v => m_input2 = v);
+            HasOption("json", "Format output as json. Exits with the code 0, even if triggers are found.", _ => m_json = true);
         }
 
         public override int Run(string[] remainingArguments)
@@ -61,7 +64,31 @@ respective project in both logs and output the difference.
                 EnumerateBinaryLogs(binaryLogFilePath2).ForEach(file => ProcessSecondBinaryLog(file, projects.Values));
             }
 
-            if (Report("Triggers", projects.Values.Where(p => p.IsTrigger && !p.IsDesignTimeBuild)) + 
+            if (m_json)
+            {
+                var res = new
+                {
+                    Triggers = projects
+                        .Values
+                        .Where(p => p.IsTrigger && !p.IsDesignTimeBuild)
+                        .Select(p => new
+                        {
+                            p.ProjectName,
+                            p.ProjectPath,
+                            Diff = p.Diff.Select(d => new { d.FirstBuild, d.SecondBuild })
+                        }),
+                    Recompiled = projects
+                        .Values
+                        .Where(p => p.IsCompiled && !p.IsDesignTimeBuild)
+                        .Select(p => new
+                        {
+                            p.ProjectName,
+                            p.ProjectPath
+                        })
+                };
+                Console.WriteLine(JsonConvert.SerializeObject(res, Formatting.Indented));
+            }
+            else if (Report("Triggers", projects.Values.Where(p => p.IsTrigger && !p.IsDesignTimeBuild)) + 
                 Report("Recompiled projects", projects.Values.Where(p => p.IsCompiled && !p.IsDesignTimeBuild)) > 0)
             {
                 return 3;
