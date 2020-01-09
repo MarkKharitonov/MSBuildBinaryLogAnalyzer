@@ -11,4 +11,7 @@
             <WarningsAsErrors>$(_SaveWarningsAsErrors)</WarningsAsErrors>
         </PropertyGroup>
     </Target>
+    <Target Name="AssertProductName" BeforeTargets="BeforeBuild">
+        <Error Text="The Product property in Directory.Build.props must be set to a meaningful value. Current value - '$(Product)'." Condition="'$(Product)' == '???' OR '$(Product)' == ''" />
+    </Target>
 </Project>
