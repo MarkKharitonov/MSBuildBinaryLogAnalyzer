@@ -4,8 +4,6 @@
 [Oo]bj
 packages
 Dayforce.PS.Core.Bootstrap.Impl.ps1
-/src/MSBuildBinaryLogAnalyzer.args.json
-/src/Properties/launchSettings.json
+MSBuildBinaryLogAnalyzer.args.json
+launchSettings.json
 *.csproj.user
-/src/MSBuildBinaryLogAnalyzer/Properties/launchSettings.json
-/src/MSBuildBinaryLogAnalyzer/MSBuildBinaryLogAnalyzer.args.json

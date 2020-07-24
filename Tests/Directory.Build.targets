@@ -1,4 +1,0 @@
-﻿<Project>
-    <Import Project="$(MSBuildThisFileDirectory)RunTests.targets" />
-    <Import Project="$(MSBuildThisFileDirectory)../Directory.Build.targets" />
-</Project>

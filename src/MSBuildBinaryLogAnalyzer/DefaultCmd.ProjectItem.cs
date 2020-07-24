@@ -21,9 +21,9 @@ namespace MSBuildBinaryLogAnalyzer
             public readonly string ProjectPath;
             public readonly string ProjectName;
             public readonly bool IsDesignTimeBuild;
-            public bool IsTrigger;
-            public bool IsCompiled;
-            public List<(string FirstBuild, string SecondBuild)> Diff;
+            public bool IsTrigger { get; set; }
+            public bool IsCompiled { get; set; }
+            public List<(string FirstBuild, string SecondBuild)> Diff { get; set; }
 
             public ProjectItem(string projectPath, int projectId, bool isDesignTimeBuild = false)
             {
