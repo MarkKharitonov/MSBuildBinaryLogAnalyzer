@@ -2,8 +2,8 @@
 .idea
 [Bb]in
 [Oo]bj
-packages
 Dayforce.PS.Core.Bootstrap.Impl.ps1
 MSBuildBinaryLogAnalyzer.args.json
 launchSettings.json
 *.csproj.user
+.sonarqube

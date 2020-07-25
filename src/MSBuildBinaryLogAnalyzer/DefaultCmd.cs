@@ -57,11 +57,11 @@ respective project in both logs and output the difference.
             }
 
             var projects = new Dictionary<int, ProjectItem>();
-            EnumerateBinaryLogs(binaryLogFilePath).ForEach(file => ProcessFirstBinaryLog(file, binaryLogFilePath2, projects));
+            binaryLogFilePath.EnumerateBinaryLogs().ForEach(file => ProcessFirstBinaryLog(file, binaryLogFilePath2, projects));
 
             if (projects.Values.Any(p => p.IsTrigger) && binaryLogFilePath2 != null)
             {
-                EnumerateBinaryLogs(binaryLogFilePath2).ForEach(file => ProcessSecondBinaryLog(file, projects.Values));
+                binaryLogFilePath2.EnumerateBinaryLogs().ForEach(file => ProcessSecondBinaryLog(file, projects.Values));
             }
 
             if (m_json)
@@ -96,10 +96,6 @@ respective project in both logs and output the difference.
 
             return 0;
         }
-
-        private static IEnumerable<string> EnumerateBinaryLogs(string path) => Directory.Exists(path)
-            ? Directory.EnumerateFiles(path, "*.binlog")
-            : (new[] { path });
 
         private static void ProcessFirstBinaryLog(string binaryLogFilePath, string binaryLogFilePath2, Dictionary<int, ProjectItem> projects)
         {

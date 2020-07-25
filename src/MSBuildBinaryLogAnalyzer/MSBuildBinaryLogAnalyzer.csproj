@@ -6,8 +6,8 @@
     </PropertyGroup>
     <ItemGroup>
       <PackageReference Include="ManyConsole" Version="2.0.1" />
-      <PackageReference Include="Microsoft.Build.Framework" Version="15.8.166" />
-      <PackageReference Include="MSBuild.StructuredLogger" Version="2.0.110" />
+      <PackageReference Include="Microsoft.Build.Framework" Version="16.6.0" />
+      <PackageReference Include="MSBuild.StructuredLogger" Version="2.1.133" />
       <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     </ItemGroup>
 </Project>

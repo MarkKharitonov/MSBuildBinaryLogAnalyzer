@@ -18,6 +18,7 @@ namespace MSBuildBinaryLogAnalyzer
             return GetConsoleProcessList(pids, pids.Length) == 1;
         }
 
+        [STAThread]
         static int Main(string[] args)
         {
             try
