@@ -18,8 +18,7 @@ namespace MSBuildBinaryLogAnalyzer
             IsCommand("del-overridden-references", "Deletes the references which are overridden by the system dependencies.");
             HasLongDescription(@"
 This command internally invokes get-overridden-references and deletes the found references
-from the respective packages.config and project files IF the resolved file path is under the
-path given by the --root argument.
+from the respective project files IF the resolved file path is under the path given by the --root argument.
 
 Outputs the same objects as get-overridden-references.
 ");
@@ -52,7 +51,6 @@ Outputs the same objects as get-overridden-references.
                 }
                 if (o.ResolvedFilePath.StartsWith(m_root))
                 {
-                    DeleteFromPackagesConfigFile(o);
                     DeleteFromProjectFile(o);
                 }
             }
@@ -62,18 +60,6 @@ Outputs the same objects as get-overridden-references.
                 Console.WriteLine(JsonConvert.SerializeObject(res, Formatting.Indented));
             }
             return 0;
-        }
-
-        internal void DeleteFromPackagesConfigFile(GetOverriddenReferences.OverriddenReferenceItem o)
-        {
-            var packagesConfigFilePath = $"{o.ProjectFilePath}\\..\\packages.config";
-            // Assume the package Id matches the name of the system dependency. Does not have to be the case in general for NuGet packages.
-            var pattern = $"\"{o.SystemDependency.Substring(0, o.SystemDependency.Length - 4)}\"";
-            var lines = File
-                .ReadAllLines(packagesConfigFilePath)
-                .Where(line => line.IndexOf(pattern, StringComparison.OrdinalIgnoreCase) < 0)
-                .ToArray();
-            File.WriteAllLines(packagesConfigFilePath, lines);
         }
 
         internal void DeleteFromProjectFile(GetOverriddenReferences.OverriddenReferenceItem o)

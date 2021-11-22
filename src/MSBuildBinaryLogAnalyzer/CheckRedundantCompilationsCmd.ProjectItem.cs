@@ -9,7 +9,7 @@ using Microsoft.Build.Logging;
 
 namespace MSBuildBinaryLogAnalyzer
 {
-    partial class DefaultCmd
+    partial class CheckRedundantCompilationsCmd
     {
         [DebuggerDisplay("{ToString(), nq} ({m_projectId})")]
         public class ProjectItem

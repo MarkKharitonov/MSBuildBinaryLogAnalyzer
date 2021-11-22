@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
-using static MSBuildBinaryLogAnalyzer.DefaultCmd;
+using static MSBuildBinaryLogAnalyzer.CheckRedundantCompilationsCmd;
 
 namespace MSBuildBinaryLogAnalyzer
 {

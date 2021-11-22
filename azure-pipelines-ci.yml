@@ -6,7 +6,7 @@ trigger:
 
 variables:
   projectDir: src\MSBuildBinaryLogAnalyzer
-  binDir: bin\Release\net472
+  binDir: bin\Release\net5
 
 name: 1.0.$(Date:yy)$(DayOfYear)$(Rev:.r)
 

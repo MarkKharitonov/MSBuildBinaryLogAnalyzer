@@ -7,7 +7,7 @@ namespace MSBuildBinaryLogAnalyzer
     public class GenerateCompileDependencyCacheTarget
     {
         public readonly TargetStartedEventArgs TargetStarted;
-        public readonly List<BuildEventArgs> Children = new List<BuildEventArgs>();
+        public readonly List<BuildEventArgs> Children = new();
 
         public GenerateCompileDependencyCacheTarget(TargetStartedEventArgs targetStarted)
         {

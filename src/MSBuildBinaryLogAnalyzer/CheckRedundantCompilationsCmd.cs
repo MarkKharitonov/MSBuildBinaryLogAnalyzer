@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace MSBuildBinaryLogAnalyzer
 {
-    public partial class DefaultCmd : ConsoleCommand
+    public partial class CheckRedundantCompilationsCmd : ConsoleCommand
     {
         private const string MARKER = @".csproj.CoreCompileInputs.cache"" is newer than output file ""obj\Debug\";
         private const string DESIGN_TIME_BUILD_MSG = @"Output file ""__NonExistentSubDir__\__NonExistentFile__"" does not exist.";
@@ -18,9 +18,9 @@ namespace MSBuildBinaryLogAnalyzer
         private string m_input2;
         private bool m_json;
 
-        public DefaultCmd()
+        public CheckRedundantCompilationsCmd()
         {
-            IsCommand("default", "The default analysis.");
+            IsCommand("check-redundant-compilations", "Checks if there are redundant compilations.");
             HasLongDescription(@"
 Checks if the given binary log contains any compilations ($task csc) due to newer compilation cache file.
 Can be a directory of many binary logs for the same solution, which is useful for binary logs produced by
