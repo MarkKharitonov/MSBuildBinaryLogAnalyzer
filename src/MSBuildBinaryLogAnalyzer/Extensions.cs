@@ -17,5 +17,7 @@ namespace MSBuildBinaryLogAnalyzer
                 action(item);
             }
         }
+
+        public static uint TotalMicroseconds(this TimeSpan ts) => (uint)(ts.TotalMilliseconds * 1_000);
     }
 }

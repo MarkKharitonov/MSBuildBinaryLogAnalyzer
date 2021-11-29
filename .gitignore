@@ -3,7 +3,5 @@
 [Bb]in
 [Oo]bj
 Dayforce.PS.Core.Bootstrap.Impl.ps1
-MSBuildBinaryLogAnalyzer.args.json
-launchSettings.json
 *.csproj.user
 .sonarqube

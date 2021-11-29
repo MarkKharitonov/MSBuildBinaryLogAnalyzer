@@ -1,0 +1,26 @@
+{
+  "FileVersion": 2,
+  "Id": "45c977bb-c265-46c3-a2b4-d5f64fd9d48f",
+  "Items": [
+    {
+      "Id": "075e5104-91fd-4ea4-bcd3-d9509f60f3fd",
+      "Command": "get-trace-events -i C:\\temp\\binlogs\\62.0.0.32519-4108-834-12.build.Main.binlog -t BridgeScriptGeneration"
+    },
+    {
+      "Id": "19afbfd3-8ca6-4fc2-a0c1-00f110749393",
+      "Command": "get-trace-events -i C:\\temp\\binlogs\\62.0.0.32519-4108-834-12.build.Main.binlog -t MvcBuildViews"
+    },
+    {
+      "Id": "87f62470-40bb-4d23-832f-04dc799eaffb",
+      "Command": "get-trace-events -i C:\\temp\\binlogs\\62.0.0.32712-0515-834-4.build.Main.binlog"
+    },
+    {
+      "Id": "4dfee2f5-db07-44be-a62d-6e048fed9403",
+      "Command": "get-trace-events -i C:\\temp\\binlogs\\62.0.0.32519-4108-834-12.build.Main.binlog"
+    },
+    {
+      "Id": "78dc64a5-2a79-40e9-b411-013a73526eb1",
+      "Command": "get-trace-events -i C:\\temp\\binlogs\\62.0.0.32519-4108-834-12.build.Main.binlog -t DoCompileTypeScript"
+    }
+  ]
+}

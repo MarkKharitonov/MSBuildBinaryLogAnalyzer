@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MSBuildBinaryLogAnalyzer": {
+      "commandName": "Project",
+      "commandLineArgs": "get-trace-events -i C:\\temp\\binlogs\\62.0.0.32519-4108-834-12.build.Main.binlog"
+    }
+  }
+}
