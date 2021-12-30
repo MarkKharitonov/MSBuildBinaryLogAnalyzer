@@ -12,29 +12,40 @@ namespace MSBuildBinaryLogAnalyzer
     {
         private string m_input;
         private string m_target;
+        private string m_output;
 
         public GetTraceEventsCmd()
         {
             IsCommand("get-trace-events", "Gets trace events for the projects or the given target across all the projects.");
 
             HasRequiredOption("i|input=", "A binary log file.", v => m_input = v);
+            HasOption("o|output=", "The output directory", v => m_output = v);
             HasOption("t|target=", "The target to focus on. By default the focus is on the entire project.", v => m_target = v);
         }
 
         public override int Run(string[] remainingArguments)
         {
-            Run(m_input, m_target);
+            Run(m_input, m_target, m_output);
             return 0;
         }
 
-        internal static void Run(string input, string target)
+        internal static void Run(string input, string target, string output)
         {
             var build = BinaryLog.ReadBuild(input);
             BuildAnalyzer.AnalyzeBuild(build);
             var events = YieldEvents(build, target);
 
             var fileNameSuffix = target == null ? "_events.json" : $"_events_for_{target}.json";
-            using var file = File.CreateText(input.Replace(".binlog", fileNameSuffix));
+            if (output != null)
+            {
+                Directory.CreateDirectory(output);
+                output = Path.Combine(output, Path.GetFileName(input).Replace(".binlog", fileNameSuffix));
+            }
+            else
+            {
+                output = input.Replace(".binlog", fileNameSuffix);
+            }
+            using var file = File.CreateText(output);
             var serializer = new JsonSerializer
             {
                 NullValueHandling = NullValueHandling.Ignore
