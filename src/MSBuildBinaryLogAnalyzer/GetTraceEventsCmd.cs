@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ManyConsole;
 using Microsoft.Build.Logging.StructuredLogger;
+using MSBuildBinaryLogAnalyzer.TraceEvents;
 using Newtonsoft.Json;
 
 namespace MSBuildBinaryLogAnalyzer
@@ -31,9 +31,7 @@ namespace MSBuildBinaryLogAnalyzer
 
         internal static void Run(string input, string target, string output)
         {
-            var build = BinaryLog.ReadBuild(input);
-            BuildAnalyzer.AnalyzeBuild(build);
-            var events = YieldEvents(build, target);
+            var events = YieldEvents(input, target);
 
             var fileNameSuffix = target == null ? "_events.json" : $"_events_for_{target}.json";
             if (output != null)
@@ -48,55 +46,19 @@ namespace MSBuildBinaryLogAnalyzer
             using var file = File.CreateText(output);
             var serializer = new JsonSerializer
             {
-                NullValueHandling = NullValueHandling.Ignore
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.Indented,
             };
             serializer.Serialize(file, events);
         }
 
-        private static IEnumerable<TraceEvent> YieldEvents(Build build, string targetName)
+        private static IEnumerable<TraceEvent> YieldEvents(string input, string target)
         {
-            IReadOnlyCollection<TimedNode> foundNodes;
-            Func<TimedNode, string> getName;
-            if (targetName != null)
-            {
-                foundNodes = build.FindChildrenRecursive<Target>(o => o.Name == targetName);
-                getName = n => ((Target)n).Project.Name;
-            }
-            else
-            {
-                foundNodes = build.FindChildrenRecursive<Project>(o =>
-                    !o.Name.EndsWith(".metaproj") &&
-                    (o.EntryTargets.Count == 0 || o.EntryTargets[0] == "Build") &&
-                    !o.Children.OfType<Target>().Any(o => o.FirstChild is Message m && m.LookupKey == "Target \"Build\" skipped. Previously built successfully."));
-                getName = n => n.Name;
-            }
-
-            foreach (var foundNode in foundNodes)
-            {
-                var name = getName(foundNode);
-                yield return StartTraceEvent(foundNode, name, build.StartTime);
-                yield return EndTraceEvent(foundNode, name, build.StartTime);
-            }
+            IBuildEventArgsStrategy strategy = target == null ? new ProjectEventArgsStrategy() : new TargetEventArgsStrategy(target);
+            var argsList = BinaryLog.ReadRecords(input).Select(o => o.Args).ToList();
+            var initialProcessor = new InitialTraceEventProducer(argsList, strategy);
+            var advancedProcessor = new TraceEventCompressor(initialProcessor);
+            return Enumerable.Range(1, initialProcessor.MaxNodeId).SelectMany(advancedProcessor.YieldEvents);
         }
-
-        private static TraceEvent EndTraceEvent(TimedNode node, string name, DateTime firstObservedTime) => new()
-        {
-            name = name,
-            ph = "E",
-            ts = (node.EndTime - firstObservedTime).TotalMicroseconds(),
-            tid = node.NodeId,
-            id = node.Id.ToString(),
-            pid = "0"
-        };
-
-        private static TraceEvent StartTraceEvent(TimedNode node, string name, DateTime firstObservedTime) => new()
-        {
-            name = name,
-            ph = "B",
-            ts = (node.StartTime - firstObservedTime).TotalMicroseconds(),
-            tid = node.NodeId,
-            id = node.Id.ToString(),
-            pid = "0"
-        };
     }
 }

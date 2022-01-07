@@ -12,11 +12,15 @@
     },
     {
       "Id": "87f62470-40bb-4d23-832f-04dc799eaffb",
-      "Command": "get-trace-events -i C:\\temp\\binlogs\\62.0.0.32712-0515-834-4.build.Main.binlog"
+      "Command": "get-trace-events -i c:\\Temp\\binlogs\\.\\tip2-DFAcceptanceTest-2022-01-06_20-10-07.binlog -o c:\\temp\\events"
+    },
+    {
+      "Id": "dcf28e2d-4e60-451d-8145-1a596abe23a8",
+      "Command": "get-trace-events -i c:\\Temp\\binlogs\\tip2-Main-2022-01-06_20-10-07.binlog -o c:\\temp\\events -t ResolveProjectReferences"
     },
     {
       "Id": "4dfee2f5-db07-44be-a62d-6e048fed9403",
-      "Command": "get-trace-events -i C:\\temp\\binlogs\\62.0.0.32519-4108-834-12.build.Main.binlog"
+      "Command": "get-trace-events -i c:\\Temp\\binlogs\\tip2-Main-2022-01-06_20-10-07.binlog -o c:\\temp\\events"
     },
     {
       "Id": "78dc64a5-2a79-40e9-b411-013a73526eb1",

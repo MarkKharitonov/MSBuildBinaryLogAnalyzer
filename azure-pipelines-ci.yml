@@ -6,7 +6,7 @@ trigger:
 
 variables:
   projectDir: src\MSBuildBinaryLogAnalyzer
-  binDir: bin\Release\net5
+  binDir: bin\Release\net6
 
 name: 1.0.$(Date:yy)$(DayOfYear)$(Rev:.r)
 
@@ -33,6 +33,7 @@ jobs:
   - template: ci/build-and-test.yml@templates
     parameters:
       withCoverage: false
+      dotNetCoreVersion: 6.x
 
   - template: ci/symbols-publish.yml@templates
 

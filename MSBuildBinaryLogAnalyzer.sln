@@ -1,6 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBuildBinaryLogAnalyzer", "src\MSBuildBinaryLogAnalyzer\MSBuildBinaryLogAnalyzer.csproj", "{45C977BB-C265-46C3-A2B4-D5F64FD9D48F}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSBuildBinaryLogAnalyzer", "src\MSBuildBinaryLogAnalyzer\MSBuildBinaryLogAnalyzer.csproj", "{45C977BB-C265-46C3-A2B4-D5F64FD9D48F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBuildBinaryLogAnalyzer.Tests", "src\MSBuildBinaryLogAnalyzer.Tests\MSBuildBinaryLogAnalyzer.Tests.csproj", "{4F0B08E9-48CC-45BC-8FE9-7AB2793B74A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +17,15 @@ Global
 		{45C977BB-C265-46C3-A2B4-D5F64FD9D48F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45C977BB-C265-46C3-A2B4-D5F64FD9D48F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45C977BB-C265-46C3-A2B4-D5F64FD9D48F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F0B08E9-48CC-45BC-8FE9-7AB2793B74A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F0B08E9-48CC-45BC-8FE9-7AB2793B74A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F0B08E9-48CC-45BC-8FE9-7AB2793B74A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F0B08E9-48CC-45BC-8FE9-7AB2793B74A6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9500D297-5A6E-43D2-8066-FD0B529B3A80}
 	EndGlobalSection
 EndGlobal
