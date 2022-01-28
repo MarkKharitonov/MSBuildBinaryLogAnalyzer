@@ -1,6 +1,6 @@
 function GetExePath([switch]$NoBuild)
 {
-    $ExePath = "$PSScriptRoot\src\MSBuildBinaryLogAnalyzer\bin\Release\net5\MSBuildBinaryLogAnalyzer.exe"
+    $ExePath = "$PSScriptRoot\src\MSBuildBinaryLogAnalyzer\bin\Release\net6\MSBuildBinaryLogAnalyzer.exe"
     if (Test-Path $ExePath)
     {
         $DebugExePath = $ExePath.Replace('\Release\','\Debug\')
