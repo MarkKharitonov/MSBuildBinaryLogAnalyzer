@@ -42,6 +42,15 @@ namespace MSBuildBinaryLogAnalyzer.TraceEvents
                     pid = "1"
                 });
             }
+
+            for (int i = 0; i < m_msbuildNodes.Count; ++i)
+            {
+                if (m_msbuildNodes[i] == null)
+                {
+                    continue;
+                }
+                m_msbuildNodes[i].Sort((x,y) => x.ts.CompareTo(y.ts));
+            }
         }
 
         public int MaxNodeId => m_msbuildNodes.Count - 1;
